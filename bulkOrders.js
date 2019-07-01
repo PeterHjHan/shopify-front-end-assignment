@@ -12,10 +12,9 @@ function enableBulkOrders() {
 
     jQuery.getJSON(productAPI + '.js', function (result) {
 
-      var variantId = $('<label class="visually-hidden" variant-id="' + result.id + '"/></label>');
+      var variantId = $('<label class="visually-hidden" variant-id="' + result.variants[0].id + '"/></label>');
       $(__this).find('.product__bulk__container').append(variantId);
-      addtoCart(__this, result.id);
-
+      addToQueue(__this, result.variants[0].id);
 
       if (result.variants.length > 1) {
         var variants = [];
@@ -55,7 +54,7 @@ function addOrderButton() {
   }
 }
 
-function addtoCart(target, variantID) {
+function addToQueue(target, variantID) {
 
   var tempCartStore = {};
 
@@ -99,7 +98,7 @@ Shopify.moveAlong = function () {
 
     if (Shopify.queue.length) {
       var request = Shopify.queue.shift();
-      Shopify.addItemToCart(request.quantity, request.id);
+      Shopify.addItemToCart(request);
     } else {
       document.location.href = '/cart';
     }
@@ -109,9 +108,16 @@ Shopify.moveAlong = function () {
 
 Shopify.addItemToCart = function (item) {
 
-  jQuery.post('/cart/add.js', {
-    quantity: item.quantity,
-    id: item.id
+  $.ajax({
+    url: '/cart/add.js',
+    dataType: 'json',
+    type: 'POST',
+    data: {
+      quantity: item.quantity,
+      id: item.id,
+    }
+  }).then(function (res) {
+    console.log(res);
   });
 }
 
