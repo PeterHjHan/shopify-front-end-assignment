@@ -8,35 +8,22 @@ function enableBulkOrders() {
     var productAPI = $(this).find('.supports-js a').attr('href');
     var __this = $(this);
 
-
-
     jQuery.getJSON(productAPI + '.js', function (result) {
-        
-      result.variants.forEach((variant) => {
-        addIncreasedQuantityLayout($(__this), result.variants);
-        
-        var variantId = $('<label class="visually-hidden" variant-id="' + variant.id + '"/></label>');
-     	 $(__this).find('.product__bulk__container').append(variantId);
-     	 
-        addToQueue(__this, variant.id);
-      
 
-      });
+      var variantId = $('<label class="visually-hidden" variant-id="' + result.variants[0].id + '"/></label>');
+      $(__this).find('.product__bulk__container').append(variantId);
+      addToQueue(__this, result.variants[0].id);
 
-//       var variantId = $('<label class="visually-hidden" variant-id="' + result.variants[0].id + '"/></label>');
-//       $(__this).find('.product__bulk__container').append(variantId);
-//       addToQueue(__this, result.variants[0].id);
-      
-//       addIncreasedQuantityLayout($(__this, productAPI));
-      
-//       if (result.variants.length > 1) {
-//         var variants = [];
-//         result.variants.forEach((variant) => {
-//           variants.push(variant);
-//         });
+      addIncreasedQuantityLayout($(__this, productAPI));
 
-//         addVariantLayout(__this, variants);
-//       }
+      if (result.variants.length > 1) {
+        var variants = [];
+        result.variants.forEach((variant) => {
+          variants.push(variant);
+        });
+
+        addVariantLayout(__this, variants);
+      }
     });
   }));
 }
@@ -44,26 +31,13 @@ function enableBulkOrders() {
 function addIncreasedQuantityLayout(target, variants) {
   var container = $('<div class="product__bulk__container"></div>');
   var input = $('<input class="quantity-selector" type="number" value="0" min="0">');
-  
+
   var element = $(container).append(input);
-  
-    if (!$(target).find('.product__bulk__container').length) {
-      
-          	console.log("how abotu here")
-    	$(target).append(element);
-      
-          $(element).hide().slideDown();
 
-	  }
-     
-  
-
-
-  //if vairants length > 1, then put the options, if not go for the selects
-  
-
-
-
+  if (!$(target).find('.product__bulk__container').length) {
+    $(target).append(element);
+    $(element).hide().slideDown();
+  }
 }
 
 
@@ -74,7 +48,6 @@ function addOrderButton() {
   orderButton = $(orderButton).prepend(spacer);
 
   if (!$('#bulk-order-button').length) {
-
     $('#bulk-order').after(orderButton);
     moveToCheckout();
   }
@@ -153,15 +126,14 @@ Shopify.addItemToCart = function (item, callback) {
 }
 
 function addVariantLayout(target, variants) {
-  
-//   $(target).find('.product__bulk__container').children().remove();
 
-  
+  //   $(target).find('.product__bulk__container').children().remove();
+
   var select = $('<select class="single-option-selector" data-option="option1" id="ProductSelect-product-template-option-0"></select');
   variants.forEach((variant) => {
     var option = $('<option value ="' + variant.title + '">' + variant.title + '</option>');
     select.append(option);
-    
+
     $(target).find('.product__bulk__container').children().replaceWith(select);
   });
 
