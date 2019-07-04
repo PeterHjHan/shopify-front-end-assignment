@@ -1,5 +1,7 @@
 Shopify.queue = [];
 
+
+
 function enableBulkOrders() {
   var collections = $('#shopify-section-collection-template');
   var products = collections.find('.product');
@@ -28,6 +30,7 @@ function enableBulkOrders() {
   }));
 }
 
+//Layout created when there are NO options
 function addIncreasedQuantityLayout(target, variantId) {
   var container = $('<div class="product__bulk__container"></div>');
   var input = $('<input class="quantity-selector" type="number" value="0" min="0">');
@@ -43,7 +46,7 @@ function addIncreasedQuantityLayout(target, variantId) {
   }
 }
 
-
+//Creates the "Order" Button on the top right to invoke the moveToCheckout()
 function addOrderButton() {
   var orderButton = $('<a href="#" id="bulk-order-button">Order</a>');
   var spacer = $('<span class="vertical-divider small--hide"></span>');
@@ -56,6 +59,7 @@ function addOrderButton() {
   }
 }
 
+//Changes text and hides all the .quantity-selector when the "Multi-Order" button is clicked
 function multiOrderButtonToggle() {
 
   var text = $('#bulk-order').text();
@@ -130,6 +134,7 @@ Shopify.moveAlong = function () {
   }
 };
 
+//Adds each item from the Shopify.Queue array to the Cart
 Shopify.addItemToCart = function (item, callback) {
 
   $.ajax({
@@ -145,6 +150,8 @@ Shopify.addItemToCart = function (item, callback) {
   });
 }
 
+
+//When There are multiple variant options, this function renders the quantity with different options
 function addVariantLayout(target, variants) {
 
   variants.forEach((variant) => {
