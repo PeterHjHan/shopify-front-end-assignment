@@ -4,12 +4,13 @@ function enableBulkOrders() {
   var collections = $('#shopify-section-collection-template');
   var products = collections.find('.product');
   addOrderButton();
+  multiOrderButtonToggle();
   products.each((function () {
     var productAPI = $(this).find('.supports-js a').attr('href');
     var __this = $(this);
 
     jQuery.getJSON(productAPI + '.js', function (result) {
-      
+
       var variantId = result.variants[0].id
 
       if (result.variants.length > 1) {
@@ -22,7 +23,7 @@ function enableBulkOrders() {
       } else {
         addIncreasedQuantityLayout($(__this), variantId);
       }
-      
+
     });
   }));
 }
@@ -36,8 +37,8 @@ function addIncreasedQuantityLayout(target, variantId) {
 
   if (!$(target).find('.product__bulk__container').length) {
     $(target).append(element);
-    $(element).hide().slideDown( "normal", function(){
-    	addToQueue(target,variantId);
+    $(element).hide().slideDown("normal", function () {
+      addToQueue(target, variantId);
     });
   }
 }
@@ -55,14 +56,31 @@ function addOrderButton() {
   }
 }
 
+function multiOrderButtonToggle() {
+
+  var text = $('#bulk-order').text();
+
+  if (text === 'Disable Multi') {
+    $('#bulk-order').text('Multi-Order');
+    $('#bulk-order-button').hide();
+    $('.product__bulk__container').slideUp();
+  } else {
+
+    $('#bulk-order').text('Disable Multi');
+    $('#bulk-order-button').show();
+    $('.product__bulk__container').slideDown();
+
+  }
+}
+
 function addToQueue(target) {
 
   var tempCartStore = {};
 
   $(target).find('.quantity-selector').change(function () {
-	var variantID = $(this).siblings('.visually-hidden').attr('variant-id');
+    var variantID = $(this).siblings('.visually-hidden').attr('variant-id');
     var quantity = parseInt(jQuery(this).val(), 10) || 0
-    
+
     tempCartStore = {
       id: variantID,
       quantity: quantity
@@ -131,17 +149,19 @@ function addVariantLayout(target, variants) {
 
   variants.forEach((variant) => {
     var container = $('<div class="product__bulk__container"></div>');
-    var variantTitle = $('<p>'+variant.title+'</p>');
+    var variantTitle = $('<p>' + variant.title + '</p>');
     var input = $('<input class="quantity-selector" type="number" value="0" min="0">');
     var variantIdLabel = $('<label class="visually-hidden" variant-id="' + variant.id + '"/></label>');
     var element = container.append(variantTitle).append(variantIdLabel).append(input)
-    
-    variantTitle.css('display', 'inline');
-    
-    $(target).append(element);
-    $(element).hide().slideDown("normal", function(){
-    	addToQueue(target);
-    });
 
+    variantTitle.css('display', 'inline');
+
+    if ($(target).find('.product__bulk__container').length < variants.length) {
+
+      $(target).append(element);
+      $(element).hide().slideDown("normal", function () {
+        addToQueue(target);
+      });
+    }
   });
 }
