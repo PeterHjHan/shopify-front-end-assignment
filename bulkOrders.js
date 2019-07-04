@@ -128,22 +128,18 @@ Shopify.addItemToCart = function (item, callback) {
 }
 
 function addVariantLayout(target, variants) {
-  
-  var container = $('<div class="product__bulk__container"></div>');
-  var input = $('<input class="quantity-selector" type="number" value="0" min="0">');
 
-  var select = $('<select class="single-option-selector" data-option="option1" id="ProductSelect-product-template-option-0"></select');
-//   var variantId = $('<label class="visually-hidden" variant-id="' + result.variants[0].id + '"/></label>');
   variants.forEach((variant) => {
-    var option = $('<option value ="' + variant.title + '">' + variant.title + '</option>');
-    select.append(option);
+    var container = $('<div class="product__bulk__container"></div>');
+    var variantTitle = $('<p>'+variant.title+'</p>');
+    var input = $('<input class="quantity-selector" type="number" value="0" min="0">');
     var variantId = $('<label class="visually-hidden" variant-id="' + variant.id + '"/></label>');
+    var element = container.append(variantTitle).append(variantId).append(input);
+    variantTitle.css('display', 'inline');
+
+    $(target).append(element);
+    $(element).hide().slideDown();
 
   });
-  
-  var element = container.append(select).append(input)
-    
-  $(target).append(element);
-  $(element).hide().slideDown();
-  
+
 }
