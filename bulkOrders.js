@@ -23,8 +23,6 @@ function enableBulkOrders() {
         addIncreasedQuantityLayout($(__this), variantId);
       }
       
-      addToQueue(__this, variantId);
-      
     });
   }));
 }
@@ -32,13 +30,15 @@ function enableBulkOrders() {
 function addIncreasedQuantityLayout(target, variantId) {
   var container = $('<div class="product__bulk__container"></div>');
   var input = $('<input class="quantity-selector" type="number" value="0" min="0">');
-  var variantId = $('<label class="visually-hidden" variant-id="' + variantId + '"/></label>');
+  var variantIdLabel = $('<label class="visually-hidden" variant-id="' + variantId + '"/></label>');
 
-  var element = $(container).append(variantId).append(input);
+  var element = $(container).append(variantIdLabel).append(input);
 
   if (!$(target).find('.product__bulk__container').length) {
     $(target).append(element);
-    $(element).hide().slideDown();
+    $(element).hide().slideDown( "normal", function(){
+    	addToQueue(target,variantId);
+    });
   }
 }
 
@@ -55,14 +55,14 @@ function addOrderButton() {
   }
 }
 
-function addToQueue(target, variantID) {
+function addToQueue(target) {
 
   var tempCartStore = {};
 
   $(target).find('.quantity-selector').change(function () {
-
+	var variantID = $(this).siblings('.visually-hidden').attr('variant-id');
     var quantity = parseInt(jQuery(this).val(), 10) || 0
-
+    
     tempCartStore = {
       id: variantID,
       quantity: quantity
@@ -133,13 +133,15 @@ function addVariantLayout(target, variants) {
     var container = $('<div class="product__bulk__container"></div>');
     var variantTitle = $('<p>'+variant.title+'</p>');
     var input = $('<input class="quantity-selector" type="number" value="0" min="0">');
-    var variantId = $('<label class="visually-hidden" variant-id="' + variant.id + '"/></label>');
-    var element = container.append(variantTitle).append(variantId).append(input);
+    var variantIdLabel = $('<label class="visually-hidden" variant-id="' + variant.id + '"/></label>');
+    var element = container.append(variantTitle).append(variantIdLabel).append(input)
+    
     variantTitle.css('display', 'inline');
-
+    
     $(target).append(element);
-    $(element).hide().slideDown();
+    $(element).hide().slideDown("normal", function(){
+    	addToQueue(target);
+    });
 
   });
-
 }
