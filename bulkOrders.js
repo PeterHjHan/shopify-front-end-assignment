@@ -9,12 +9,8 @@ function enableBulkOrders() {
     var __this = $(this);
 
     jQuery.getJSON(productAPI + '.js', function (result) {
-
-      var variantId = $('<label class="visually-hidden" variant-id="' + result.variants[0].id + '"/></label>');
-      $(__this).find('.product__bulk__container').append(variantId);
-      addToQueue(__this, result.variants[0].id);
-
-      addIncreasedQuantityLayout($(__this, productAPI));
+      
+      var variantId = result.variants[0].id
 
       if (result.variants.length > 1) {
         var variants = [];
@@ -23,16 +19,22 @@ function enableBulkOrders() {
         });
 
         addVariantLayout(__this, variants);
+      } else {
+        addIncreasedQuantityLayout($(__this), variantId);
       }
+      
+      addToQueue(__this, variantId);
+      
     });
   }));
 }
 
-function addIncreasedQuantityLayout(target, variants) {
+function addIncreasedQuantityLayout(target, variantId) {
   var container = $('<div class="product__bulk__container"></div>');
   var input = $('<input class="quantity-selector" type="number" value="0" min="0">');
+  var variantId = $('<label class="visually-hidden" variant-id="' + variantId + '"/></label>');
 
-  var element = $(container).append(input);
+  var element = $(container).append(variantId).append(input);
 
   if (!$(target).find('.product__bulk__container').length) {
     $(target).append(element);
@@ -126,15 +128,22 @@ Shopify.addItemToCart = function (item, callback) {
 }
 
 function addVariantLayout(target, variants) {
-
-  //   $(target).find('.product__bulk__container').children().remove();
+  
+  var container = $('<div class="product__bulk__container"></div>');
+  var input = $('<input class="quantity-selector" type="number" value="0" min="0">');
 
   var select = $('<select class="single-option-selector" data-option="option1" id="ProductSelect-product-template-option-0"></select');
+//   var variantId = $('<label class="visually-hidden" variant-id="' + result.variants[0].id + '"/></label>');
   variants.forEach((variant) => {
     var option = $('<option value ="' + variant.title + '">' + variant.title + '</option>');
     select.append(option);
+    var variantId = $('<label class="visually-hidden" variant-id="' + variant.id + '"/></label>');
 
-    $(target).find('.product__bulk__container').children().replaceWith(select);
   });
-
+  
+  var element = container.append(select).append(input)
+    
+  $(target).append(element);
+  $(element).hide().slideDown();
+  
 }
