@@ -1,7 +1,5 @@
 Shopify.queue = [];
 
-
-
 function enableBulkOrders() {
   var collections = $('#shopify-section-collection-template');
   var products = collections.find('.product');
