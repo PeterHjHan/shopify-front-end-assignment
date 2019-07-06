@@ -1,14 +1,14 @@
 Shopify.queue = [];
 
-var multiOrderButton = $('<span class="vertical-divider small--hide"></span><a href="#" onClick="enableBulkOrders()" id="bulk-order">Multi-Order</a>');
+var multiOrderButton = $('<span class="vertical-divider small--hide"></span><a href="#" onClick="Shopify.bulkOrders.enableBulkOrders" id="bulk-order">Multi-Order</a>');
 
 $('#multi__order__enable').closest('body').find('.top-bar.grid').children().last().append(multiOrderButton);
 
-function enableBulkOrders() {
+Shopify.bulkOrders.enableBulkOrders = function() {
   var collections = $('#shopify-section-collection-template');
   var products = collections.find('.product');
-  addOrderButton();
-  multiOrderButtonToggle();
+  Shopify.bulkOrders.addOrderButton();
+  Shopify.bulkOrders.multiOrderButtonToggle();
   products.each((function () {
     var productAPI = $(this).find('.supports-js a').attr('href');
     var __this = $(this);
@@ -23,9 +23,9 @@ function enableBulkOrders() {
           variants.push(variant);
         });
 
-        addVariantLayout(__this, variants);
+        Shopify.bulkOrders.addVariantLayout(__this, variants);
       } else {
-        addIncreasedQuantityLayout($(__this), variantId);
+        Shopify.bulkOrders.addIncreasedQuantityLayout($(__this), variantId);
       }
 
     });
@@ -33,7 +33,7 @@ function enableBulkOrders() {
 }
 
 //Layout created when there are NO options
-function addIncreasedQuantityLayout(target, variantId) {
+Shopify.bulkOrders.addIncreasedQuantityLayout = function (target, variantId) {
   var container = $('<div class="product__bulk__container"></div>');
   var input = $('<input class="quantity-selector" type="number" value="0" min="0">');
   var variantIdLabel = $('<label class="visually-hidden" variant-id="' + variantId + '"/></label>');
@@ -43,13 +43,13 @@ function addIncreasedQuantityLayout(target, variantId) {
   if (!$(target).find('.product__bulk__container').length) {
     $(target).append(element);
     $(element).hide().slideDown("normal", function () {
-      addToQueue(target, variantId);
+      Shopify.bulkOrders.addToQueue(target, variantId);
     });
   }
 }
 
 //Creates the "Order" Button on the top right to invoke the moveToCheckout()
-function addOrderButton() {
+Shopify.bulkOrders.addOrderButton = function () {
   var orderButton = $('<a href="#" id="bulk-order-button">Order</a>');
   var spacer = $('<span class="vertical-divider small--hide"></span>');
 
@@ -57,12 +57,12 @@ function addOrderButton() {
 
   if (!$('#bulk-order-button').length) {
     $('#bulk-order').after(orderButton);
-    moveToCheckout();
+    Shopify.bulkOrders.moveToCheckout();
   }
 }
 
 //Changes text and hides all the .quantity-selector when the "Multi-Order" button is clicked
-function multiOrderButtonToggle() {
+Shopify.bulkOrders.multiOrderButtonToggle = function () {
 
   var text = $('#bulk-order').text();
 
@@ -79,7 +79,7 @@ function multiOrderButtonToggle() {
   }
 }
 
-function addToQueue(target) {
+Shopify.bulkOrders.addToQueue = function (target) {
 
   var tempCartStore = {};
 
@@ -116,28 +116,28 @@ function addToQueue(target) {
   });
 };
 
-function moveToCheckout() {
+Shopify.bulkOrders.moveToCheckout = function () {
   $('#bulk-order-button').click(function (e) {
 
     e.preventDefault();
 
-    Shopify.moveAlong();
+    Shopify.bulkOrders.moveAlong();
   });
 }
 
 
-Shopify.moveAlong = function () {
+Shopify.bulkOrders.moveAlong = function () {
 
   if (Shopify.queue.length) {
     var request = Shopify.queue.shift();
-    Shopify.addItemToCart(request, Shopify.moveAlong);
+    Shopify.bulkOrders.addItemToCart(request, Shopify.bulkOrders.moveAlong);
   } else {
     document.location.href = '/cart';
   }
 };
 
 //Adds each item from the Shopify.Queue array to the Cart
-Shopify.addItemToCart = function (item, callback) {
+Shopify.bulkOrders.addItemToCart = function (item, callback) {
 
   $.ajax({
     url: '/cart/add.js',
@@ -154,7 +154,7 @@ Shopify.addItemToCart = function (item, callback) {
 
 
 //When There are multiple variant options, this function renders the quantity with different options
-function addVariantLayout(target, variants) {
+Shopify.bulkOrders.addVariantLayout = function (target, variants) {
 
   variants.forEach((variant) => {
     var container = $('<div class="product__bulk__container"></div>');
@@ -169,7 +169,7 @@ function addVariantLayout(target, variants) {
 
       $(target).append(element);
       $(element).hide().slideDown("normal", function () {
-        addToQueue(target);
+        Shopify.bulkOrders.addToQueue(target);
       });
     }
   });
