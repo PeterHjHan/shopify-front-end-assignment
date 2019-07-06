@@ -1,5 +1,9 @@
 Shopify.queue = [];
 
+var multiOrderButton = $('<span class="vertical-divider small--hide"></span><a href="#" onClick="enableBulkOrders()" id="bulk-order">Multi-Order</a>');
+
+$('#multi__order__enable').closest('body').find('.top-bar.grid').children().last().append(multiOrderButton);
+
 function enableBulkOrders() {
   var collections = $('#shopify-section-collection-template');
   var products = collections.find('.product');
