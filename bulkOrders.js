@@ -16,10 +16,9 @@ Shopify.bulkOrders.enableBulkOrders = function () {
 
     jQuery.getJSON(productAPI + '.js', function (result) {
       
-      console.log(result);
-
       var variantId = result.variants[0].id;
-
+      var productName = result.title;
+      
       if (result.available) {
         if (result.variants.length > 1) {
           var variants = [];
@@ -27,9 +26,9 @@ Shopify.bulkOrders.enableBulkOrders = function () {
             variants.push(variant);
           });
 
-          Shopify.bulkOrders.addVariantLayout(__this, variants);
+          Shopify.bulkOrders.addVariantLayout(__this, variants, productName);
         } else {
-          Shopify.bulkOrders.addIncreasedQuantityLayout($(__this), variantId);
+          Shopify.bulkOrders.addIncreasedQuantityLayout($(__this), variantId, productName);
         }
       }
     });
@@ -37,10 +36,10 @@ Shopify.bulkOrders.enableBulkOrders = function () {
 }
 
 //Layout created when there are NO options
-Shopify.bulkOrders.addIncreasedQuantityLayout = function (target, variantId) {
+Shopify.bulkOrders.addIncreasedQuantityLayout = function (target, variantId, productName) {
   var container = $('<div class="product__bulk__container"></div>');
   var input = $('<input class="quantity-selector" type="number" value="0" min="0">');
-  var variantIdLabel = $('<label class="visually-hidden" variant-id="' + variantId + '"/></label>');
+  var variantIdLabel = $('<label class="visually-hidden" variant-id="' + variantId + '"product-name="' + productName + '"/></label>');
 
   var element = $(container).append(variantIdLabel).append(input);
 
@@ -87,16 +86,18 @@ Shopify.bulkOrders.addToQueue = function (target) {
   $(target).find('.quantity-selector').change(function () {
     var variantID = $(this).siblings('.visually-hidden').attr('variant-id');
     var quantity = parseInt(jQuery(this).val(), 10) || 0
+    var name = $(this).siblings('.visually-hidden').attr('product-name');
 
     tempCartStore = {
       id: variantID,
+      name: name,
       quantity: quantity
     }
     //adds the variantID into Shopify.queue
     var variantIDexists = Shopify.queue.some(item => item.id === variantID);
 
     if (quantity !== 0) {
-      $(this).css('background-color', 'rgb(38, 194, 129)');
+      $(this).css('background-color', '#b8cd88');
     } else {
       $(this).css('background-color', '#f4f4f4');
     }
@@ -156,21 +157,32 @@ Shopify.bulkOrders.addItemToCart = function (item, callback) {
     data: {
       quantity: item.quantity,
       id: item.id,
+    },
+    success: function(res) {
+      callback();
+    },	
+    error: function(err) {
+    var errorResponse = err.responseJSON;
+      alert(errorResponse.description);
+      $('#bulk-order-button').prop('disabled', false);
+      $('#bulk-order-button').css({ 'border': '1px solid #333', 'color' : '#333' });
+      $('#bulk-order-button').text('Order');
+      
+      
+      
     }
-  }).then(function (res) {
-    callback();
   });
 }
 
 
 //When There are multiple variant options, this function renders the quantity with different options
-Shopify.bulkOrders.addVariantLayout = function (target, variants) {
+Shopify.bulkOrders.addVariantLayout = function (target, variants, productName) {
 
   variants.forEach((variant) => {
     var container = $('<div class="product__bulk__container"></div>');
     var variantTitle = $('<p>' + variant.title + '</p>');
     var input = $('<input class="quantity-selector" type="number" value="0" min="0">');
-    var variantIdLabel = $('<label class="visually-hidden" variant-id="' + variant.id + '"/></label>');
+    var variantIdLabel = $('<label class="visually-hidden" variant-id="' + variant.id + '"product-name="' + productName + '"/></label>');
     var element = container.append(variantTitle).append(variantIdLabel).append(input)
 
     variantTitle.css({'display': 'inline', 'margin-right': '20px'} );
@@ -206,7 +218,7 @@ if (websiteURL) {
     var variantIDexists = Shopify.queue.some(item => item.id === variantID);
 
     if (quantity !== 0) {
-      $(this).css('background-color', 'rgb(38, 194, 129)');
+      $(this).css('background-color', '#b8cd88');
     } else {
       $(this).css('background-color', '#f4f4f4');
     }
