@@ -5,7 +5,7 @@ var multiOrderButton = $('<span class="vertical-divider small--hide"></span><a h
 
 $('#multi__order__enable').closest('body').find('.top-bar.grid').children().last().append(multiOrderButton);
 
-Shopify.bulkOrders.enableBulkOrders = function() {
+Shopify.bulkOrders.enableBulkOrders = function () {
   var collections = $('#shopify-section-collection-template');
   var products = collections.find('.product');
   Shopify.bulkOrders.addOrderButton();
@@ -18,7 +18,7 @@ Shopify.bulkOrders.enableBulkOrders = function() {
 
       var variantId = result.variants[0].id;
 
-      if(result.available) {
+      if (result.available) {
         if (result.variants.length > 1) {
           var variants = [];
           result.variants.forEach((variant) => {
@@ -120,7 +120,7 @@ Shopify.bulkOrders.addToQueue = function (target) {
 
 Shopify.bulkOrders.moveToCheckout = function () {
   $('#bulk-order-button').click(function (e) {
-	
+
     e.preventDefault();
 
     Shopify.bulkOrders.moveAlong();
@@ -183,7 +183,7 @@ Shopify.bulkOrders.addVariantLayout = function (target, variants) {
 var websiteURL = window.location.pathname.includes('order-form');
 
 if (websiteURL) {
-  	
+
   var tempCartStore = {};
 
   $('.quantity-selector').change(function () {
@@ -217,27 +217,31 @@ if (websiteURL) {
     }
 
   });
-  
+
   Shopify.bulkOrders.moveToCheckout();
-  
+
   //Increases the Quantity
-  $('tbody').find('.increase-quantity').each(function() {
-    $(this).click(function() {
-    var quantityValue = parseInt($(this).siblings('.quantity-selector').val());
-    quantityValue++
-    
-    $(this).siblings('.quantity-selector').val(quantityValue);
+  $('tbody').find('.increase-quantity').each(function () {
+    $(this).click(function () {
+      var quantityValue = parseInt($(this).siblings('.quantity-selector').val());
+      var maximumValue = parseInt($(this).siblings('.quantity-selector').attr('max'));
+
+      quantityValue == maximumValue ? maximumValue : quantityValue++;
+
+      $(this).siblings('.quantity-selector').val(quantityValue);
+      $(this).siblings('.quantity-selector').change();
     });
   });
-  
+
   //Decrease the Quantity
-   $('tbody').find('.decrease-quantity').each(function() {
-    $(this).click(function() {
-    var quantityValue = parseInt($(this).siblings('.quantity-selector').val());
-      quantityValue == 0 ? 0 : quantityValue--
-    
-    $(this).siblings('.quantity-selector').val(quantityValue);
+  $('tbody').find('.decrease-quantity').each(function () {
+    $(this).click(function () {
+      var quantityValue = parseInt($(this).siblings('.quantity-selector').val());
+      quantityValue == 0 ? 0 : quantityValue--;
+
+      $(this).siblings('.quantity-selector').val(quantityValue);
+      $(this).siblings('.quantity-selector').change();
     });
   });
-	
+
 }
