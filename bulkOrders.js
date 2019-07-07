@@ -1,6 +1,7 @@
 Shopify.queue = [];
+Shopify.bulkOrders = {};
 
-var multiOrderButton = $('<span class="vertical-divider small--hide"></span><a href="#" onClick="Shopify.bulkOrders.enableBulkOrders" id="bulk-order">Multi-Order</a>');
+var multiOrderButton = $('<span class="vertical-divider small--hide"></span><a href="#" onClick="Shopify.bulkOrders.enableBulkOrders()" id="bulk-order">Multi-Order</a>');
 
 $('#multi__order__enable').closest('body').find('.top-bar.grid').children().last().append(multiOrderButton);
 
@@ -15,19 +16,20 @@ Shopify.bulkOrders.enableBulkOrders = function() {
 
     jQuery.getJSON(productAPI + '.js', function (result) {
 
-      var variantId = result.variants[0].id
+      var variantId = result.variants[0].id;
 
-      if (result.variants.length > 1) {
-        var variants = [];
-        result.variants.forEach((variant) => {
-          variants.push(variant);
-        });
+      if(result.available) {
+        if (result.variants.length > 1) {
+          var variants = [];
+          result.variants.forEach((variant) => {
+            variants.push(variant);
+          });
 
-        Shopify.bulkOrders.addVariantLayout(__this, variants);
-      } else {
-        Shopify.bulkOrders.addIncreasedQuantityLayout($(__this), variantId);
+          Shopify.bulkOrders.addVariantLayout(__this, variants);
+        } else {
+          Shopify.bulkOrders.addIncreasedQuantityLayout($(__this), variantId);
+        }
       }
-
     });
   }));
 }
@@ -118,7 +120,7 @@ Shopify.bulkOrders.addToQueue = function (target) {
 
 Shopify.bulkOrders.moveToCheckout = function () {
   $('#bulk-order-button').click(function (e) {
-
+	
     e.preventDefault();
 
     Shopify.bulkOrders.moveAlong();
@@ -173,4 +175,69 @@ Shopify.bulkOrders.addVariantLayout = function (target, variants) {
       });
     }
   });
+}
+
+
+//This is the section For the order-form page
+
+var websiteURL = window.location.pathname.includes('order-form');
+
+if (websiteURL) {
+  	
+  var tempCartStore = {};
+
+  $('.quantity-selector').change(function () {
+    var variantID = $(this).siblings('.visually-hidden').attr('variant-id');
+    var quantity = parseInt(jQuery(this).val(), 10) || 0
+
+    tempCartStore = {
+      id: variantID,
+      quantity: quantity
+    }
+    //adds the variantID into Shopify.queue
+    var variantIDexists = Shopify.queue.some(item => item.id === variantID);
+
+    if (quantity !== 0) {
+      $(this).css('background-color', 'rgb(38, 194, 129)');
+    } else {
+      $(this).css('background-color', '#f4f4f4');
+    }
+
+    if (!variantIDexists) {
+      Shopify.queue.push(tempCartStore);
+    }
+
+    //updates the Quantity of the Shopify.queue with its variantID
+    var index = Shopify.queue.findIndex((tempCart => tempCart.id === variantID));
+    Shopify.queue[index].quantity = quantity;
+
+    //removes the variantID when quantity reaches 0;
+    if (Shopify.queue[index].quantity === 0) {
+      Shopify.queue.splice(index, 1);
+    }
+
+  });
+  
+  Shopify.bulkOrders.moveToCheckout();
+  
+  //Increases the Quantity
+  $('tbody').find('.increase-quantity').each(function() {
+    $(this).click(function() {
+    var quantityValue = parseInt($(this).siblings('.quantity-selector').val());
+    quantityValue++
+    
+    $(this).siblings('.quantity-selector').val(quantityValue);
+    });
+  });
+  
+  //Decrease the Quantity
+   $('tbody').find('.decrease-quantity').each(function() {
+    $(this).click(function() {
+    var quantityValue = parseInt($(this).siblings('.quantity-selector').val());
+      quantityValue == 0 ? 0 : quantityValue--
+    
+    $(this).siblings('.quantity-selector').val(quantityValue);
+    });
+  });
+	
 }
