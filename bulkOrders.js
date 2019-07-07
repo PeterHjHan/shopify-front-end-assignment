@@ -2,14 +2,16 @@ Shopify.queue = [];
 Shopify.bulkOrders = {};
 
 var multiOrderButton = $('<span class="vertical-divider small--hide"></span><a href="#" onClick="Shopify.bulkOrders.enableBulkOrders()" id="bulk-order">Multi-Order</a>');
-
+//When Multi order is enabled in the Theme Settings by the Merchant, it creates the element tag with id multi__order__enable, this code creates the Multi Order button tag if that exists
 $('#multi__order__enable').closest('body').find('.top-bar.grid').children().last().append(multiOrderButton);
 
+//Start of Function when 'Multi-Order' is clicked
 Shopify.bulkOrders.enableBulkOrders = function () {
   var collections = $('#shopify-section-collection-template');
   var products = collections.find('.product');
   Shopify.bulkOrders.addOrderButton();
   Shopify.bulkOrders.multiOrderButtonToggle();
+
   products.each((function () {
     var productAPI = $(this).find('.supports-js a').attr('href');
     var __this = $(this);
@@ -20,15 +22,16 @@ Shopify.bulkOrders.enableBulkOrders = function () {
       var productName = result.title;
 
       if (result.available) {
+          //If products have variant options (i.e. size)
         if (result.variants.length > 1) {
           var variants = [];
           result.variants.forEach((variant) => {
             variants.push(variant);
           });
-
-          Shopify.bulkOrders.addVariantLayout(__this, variants, productName);
+          Shopify.bulkOrders.addQuantityLayoutToMultipleVariants(__this, variants, productName);
         } else {
-          Shopify.bulkOrders.addIncreasedQuantityLayout($(__this), variantId, productName);
+          //no variant options
+          Shopify.bulkOrders.addQuantityLayoutToSingleVariant($(__this), variantId, productName);
         }
       }
     });
@@ -36,14 +39,14 @@ Shopify.bulkOrders.enableBulkOrders = function () {
 }
 
 //Layout created when there are NO options
-Shopify.bulkOrders.addIncreasedQuantityLayout = function (target, variantId, productName) {
+Shopify.bulkOrders.addQuantityLayoutToSingleVariant = function (target, variantId, productName) {
   var container = $('<div class="product__bulk__container"></div>');
   var input = $('<input class="quantity-selector" id="product_quantity" type="number" value="0" min="0">');
   var variantIdLabel = $('<label class="visually-hidden" variant-id="' + variantId + '"product-name="' + productName + '"/></label>');
 
   var element = $(container).append(variantIdLabel).append(input);
 
-  if (!$(target).find('.product__bulk__container').length) {
+  if ( !$(target).find('.product__bulk__container').length ) {
     $(target).append(element);
     $(element).hide().slideDown("normal", function () {
       Shopify.bulkOrders.addToQueue(target, variantId);
@@ -71,11 +74,9 @@ Shopify.bulkOrders.multiOrderButtonToggle = function () {
     $('#bulk-order-button').hide();
     $('.product__bulk__container').slideUp();
   } else {
-
     $('#bulk-order').text('Disable Multi');
     $('#bulk-order-button').show();
     $('.product__bulk__container').slideDown();
-
   }
 }
 
@@ -91,7 +92,6 @@ Shopify.bulkOrders.addToQueue = function (target) {
     if ($(this).hasClass('order-error')) {
       $(this).removeClass('order-error');
     }
-
 
     tempCartStore = {
       id: variantID,
@@ -152,10 +152,8 @@ Shopify.bulkOrders.moveAlong = function () {
     Shopify.bulkOrders.addItemToCart(request, Shopify.bulkOrders.moveAlong);
   } else {
     if ($('.order-error').length == 0) {
-      console.log("--------", $('.order-error').length);
       document.location.href = '/cart';
     }
-
   }
 };
 
@@ -188,17 +186,14 @@ Shopify.bulkOrders.addItemToCart = function (item, callback) {
       });
       $('#bulk-order-button').text('Order');
 
-
-
       Shopify.queue.pop();
       callback();
     }
   });
 }
 
-
 //When There are multiple variant options, this function renders the quantity with different options
-Shopify.bulkOrders.addVariantLayout = function (target, variants, productName) {
+Shopify.bulkOrders.addQuantityLayoutToMultipleVariants = function (target, variants, productName) {
 
   variants.forEach((variant) => {
     var container = $('<div class="product__bulk__container"></div>');
@@ -222,11 +217,11 @@ Shopify.bulkOrders.addVariantLayout = function (target, variants, productName) {
   });
 }
 
-
-//This is the section For the order-form page
+//============================== This is the section For the Order-Form Page ========================
 
 var websiteURL = window.location.pathname.includes('order-form');
 
+//Only apply this function if the url handle is the order-form
 if (websiteURL) {
 
   var tempCartStore = {};

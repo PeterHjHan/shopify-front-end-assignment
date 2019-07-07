@@ -34,7 +34,10 @@ The task was to complete a collections order-page so I searched on Google and Sh
     1. Under **Templates** > **collection.order-form.liquid,** find the following code:
     ```{% assign collection = collections.your-collection-handle-here %}```and replace **your-collection-handle-here** with **order-form** 
     ```%{assign collection = collections.order-form %}```
-4. To create a link
+4. Go to **Themes** > **Action** > **Edit Code**
+    1. Under **Assets** > `Add a new asset` > Create a blank file > type in `bulkOrder` and choose js.liquid
+    2. Copy and paste the full code from the [gist link](https://gist.github.com/PeterHjHan/5363f65b0eb2e389f72e706d20750c8c)
+5. To create a link
     1. In the Navigation: follow the tutorials on [link](https://help.shopify.com/en/manual/sell-online/online-store/menus-and-links/editing-menus)
     2. In the header of your theme: (this requires knowledge of HTML tags and using the inspection tool of your browser)
         1. **Go to Themes** > **Action** > **Edit Code** to the desired Theme
@@ -88,4 +91,4 @@ I wanted to do something other than create a new page for the following reasons:
 4. To enable or disable this feature,
   1. **Themes** > **Customize** > Choose "Collection Pages"
   2. Under Sections > Collection pages > Check "Enable Multi-Order" or uncheck
-  3. Click **Save**
+  3. Click **Save** 
