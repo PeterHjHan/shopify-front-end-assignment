@@ -88,6 +88,11 @@ Shopify.bulkOrders.addToQueue = function (target) {
     var quantity = parseInt(jQuery(this).val(), 10) || 0
     var name = $(this).siblings('.visually-hidden').attr('product-name');
 
+    if ($(this).hasClass('order-error')) {
+      $(this).removeClass('order-error');
+    }
+
+
     tempCartStore = {
       id: variantID,
       name: name,
@@ -146,7 +151,11 @@ Shopify.bulkOrders.moveAlong = function () {
     var request = Shopify.queue.shift();
     Shopify.bulkOrders.addItemToCart(request, Shopify.bulkOrders.moveAlong);
   } else {
-    document.location.href = '/cart';
+    if ($('.order-error').length == 0) {
+      console.log("--------", $('.order-error').length);
+      document.location.href = '/cart';
+    }
+
   }
 };
 
@@ -168,7 +177,9 @@ Shopify.bulkOrders.addItemToCart = function (item, callback) {
       var errorResponse = err.responseJSON;
       var productName = item.name;
 
-      alert(errorResponse);
+      $('[product-name="' + productName + '"]').siblings('#product_quantity').change().css('background-color', '#E97451').addClass('order-error');
+
+      alert(errorResponse.description);
 
       $('#bulk-order-button').prop('disabled', false);
       $('#bulk-order-button').css({
@@ -177,8 +188,10 @@ Shopify.bulkOrders.addItemToCart = function (item, callback) {
       });
       $('#bulk-order-button').text('Order');
 
-      $('[product-name="' + productName + '"]').siblings('#product_quantity').change().css('background-color', '#E97451');
 
+
+      Shopify.queue.pop();
+      callback();
     }
   });
 }
@@ -222,6 +235,10 @@ if (websiteURL) {
     var variantID = $(this).siblings('.visually-hidden').attr('variant-id');
     var quantity = parseInt(jQuery(this).val(), 10) || 0
     var name = $(this).siblings('.visually-hidden').attr('product-name');
+
+    if ($(this).hasClass('order-error')) {
+      $(this).removeClass('order-error');
+    }
 
     tempCartStore = {
       id: variantID,
