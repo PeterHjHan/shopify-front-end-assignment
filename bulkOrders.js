@@ -15,10 +15,10 @@ Shopify.bulkOrders.enableBulkOrders = function () {
     var __this = $(this);
 
     jQuery.getJSON(productAPI + '.js', function (result) {
-      
+
       var variantId = result.variants[0].id;
       var productName = result.title;
-      
+
       if (result.available) {
         if (result.variants.length > 1) {
           var variants = [];
@@ -38,7 +38,7 @@ Shopify.bulkOrders.enableBulkOrders = function () {
 //Layout created when there are NO options
 Shopify.bulkOrders.addIncreasedQuantityLayout = function (target, variantId, productName) {
   var container = $('<div class="product__bulk__container"></div>');
-  var input = $('<input class="quantity-selector" type="number" value="0" min="0">');
+  var input = $('<input class="quantity-selector" id="product_quantity" type="number" value="0" min="0">');
   var variantIdLabel = $('<label class="visually-hidden" variant-id="' + variantId + '"product-name="' + productName + '"/></label>');
 
   var element = $(container).append(variantIdLabel).append(input);
@@ -122,15 +122,18 @@ Shopify.bulkOrders.moveToCheckout = function () {
   $('#bulk-order-button').click(function (e) {
 
     e.preventDefault();
-    
-    if(Shopify.queue.length > 0) {
+
+    if (Shopify.queue.length > 0) {
       $(this).text('Submitting');
-	  $(this).prop('disabled', true);	
-      $(this).css({ 'border': '1px solid #d3d3d3', 'color' : '#d3d3d3' });
+      $(this).prop('disabled', true);
+      $(this).css({
+        'border': '1px solid #d3d3d3',
+        'color': '#d3d3d3'
+      });
       Shopify.bulkOrders.moveAlong();
-      
+
     } else {
-     alert('You have no items selected'); 
+      alert('You have no items selected');
     }
 
   });
@@ -158,18 +161,24 @@ Shopify.bulkOrders.addItemToCart = function (item, callback) {
       quantity: item.quantity,
       id: item.id,
     },
-    success: function(res) {
+    success: function (res) {
       callback();
-    },	
-    error: function(err) {
-    var errorResponse = err.responseJSON;
-      alert(errorResponse.description);
+    },
+    error: function (err) {
+      var errorResponse = err.responseJSON;
+      var productName = item.name;
+
+      alert(errorResponse);
+
       $('#bulk-order-button').prop('disabled', false);
-      $('#bulk-order-button').css({ 'border': '1px solid #333', 'color' : '#333' });
+      $('#bulk-order-button').css({
+        'border': '1px solid #333',
+        'color': '#333'
+      });
       $('#bulk-order-button').text('Order');
-      
-      
-      
+
+      $('[product-name="' + productName + '"]').siblings('#product_quantity').change().css('background-color', '#E97451');
+
     }
   });
 }
@@ -185,7 +194,10 @@ Shopify.bulkOrders.addVariantLayout = function (target, variants, productName) {
     var variantIdLabel = $('<label class="visually-hidden" variant-id="' + variant.id + '"product-name="' + productName + '"/></label>');
     var element = container.append(variantTitle).append(variantIdLabel).append(input)
 
-    variantTitle.css({'display': 'inline', 'margin-right': '20px'} );
+    variantTitle.css({
+      'display': 'inline',
+      'margin-right': '20px'
+    });
 
     if ($(target).find('.product__bulk__container').length < variants.length) {
 
@@ -209,9 +221,11 @@ if (websiteURL) {
   $('.quantity-selector').change(function () {
     var variantID = $(this).siblings('.visually-hidden').attr('variant-id');
     var quantity = parseInt(jQuery(this).val(), 10) || 0
+    var name = $(this).siblings('.visually-hidden').attr('product-name');
 
     tempCartStore = {
       id: variantID,
+      name: name,
       quantity: quantity
     }
     //adds the variantID into Shopify.queue
